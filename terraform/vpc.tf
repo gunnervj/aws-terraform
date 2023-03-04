@@ -5,14 +5,13 @@ resource "aws_vpc" "my-vpc" {
   instance_tenancy                 = "default"
   enable_dns_support               = true
   enable_dns_hostnames             = true
-  
+
   tags = {
     "Name" = "${var.project}-vpc"
   }
 }
 
 # internet gateway
-
 resource "aws_internet_gateway" "my-internet-gateway" {
   vpc_id = aws_vpc.my-vpc.id
 
@@ -23,16 +22,16 @@ resource "aws_internet_gateway" "my-internet-gateway" {
 
 # public subnet
 resource "aws_subnet" "my-public-subnet" {
-  vpc_id = aws_vpc.my-vpc.id
-  # 10.255.0.0/20 -> 10.255.0.0/24
-  cidr_block                      = cidrsubnet(aws_vpc.my-vpc.cidr_block, 4, 0)
-  ipv6_cidr_block                 = cidrsubnet(aws_vpc.my-vpc.ipv6_cidr_block, 8, 0)
+  count                           = var.public_subnet_count
+  vpc_id                          = aws_vpc.my-vpc.id
+  cidr_block                      = cidrsubnet(aws_vpc.my-vpc.cidr_block, 4, count.index)
+  ipv6_cidr_block                 = cidrsubnet(aws_vpc.my-vpc.ipv6_cidr_block, 8, count.index)
   assign_ipv6_address_on_creation = true
   map_public_ip_on_launch         = true
-  availability_zone               = data.aws_availability_zones.available.names[0]
+  availability_zone               = data.aws_availability_zones.available.names[count.index]
 
   tags = {
-    "Name" = "${var.project}-public-${data.aws_availability_zones.available.names[0]}"
+    "Name" = "${var.project}-public-${data.aws_availability_zones.available.names[count.index]}"
   }
 }
 
@@ -52,12 +51,63 @@ resource "aws_route_table" "my-public-route-table" {
 }
 
 resource "aws_route_table_association" "my-public-route-table-asso" {
+  count          = var.public_subnet_count
   route_table_id = aws_route_table.my-public-route-table.id
-  subnet_id      = aws_subnet.my-public-subnet.id
+  subnet_id      = element(aws_subnet.my-public-subnet.*.id, count.index)
 }
 
 # private subnet
+resource "aws_subnet" "my-private-subnet" {
+  count             = var.private_subnet_count
+  vpc_id            = aws_vpc.my-vpc.id
+  cidr_block        = cidrsubnet(aws_vpc.my-vpc.cidr_block, 4, count.index + var.public_subnet_count)
+  availability_zone = data.aws_availability_zones.available.names[count.index]
 
-# private route tables and routes
+  tags = {
+    "Name" = "${var.project}-private-${data.aws_availability_zones.available.names[count.index]}"
+  }
+}
+
+# Elastic IP for NAT
+resource "aws_eip" "nat_gateway_eip" {
+  vpc = true
+
+  tags = {
+    "Name" = "${var.project}-nat-gateway-eip"
+  }
+}
 
 # NAT gateway
+resource "aws_nat_gateway" "my_nat_gateway" {
+  allocation_id = aws_eip.nat_gateway_eip.id
+  subnet_id     = aws_subnet.my-public-subnet[0].id
+
+  tags = {
+    "Name" = "${var.project}-nat-gateway"
+  }
+  depends_on = [
+    aws_internet_gateway.my-internet-gateway
+  ]
+}
+
+# private route tables and routes
+resource "aws_route_table" "my-private-route-table" {
+  vpc_id = aws_vpc.my-vpc.id
+
+  tags = {
+    "Name" = "${var.project}-private-rt"
+  }
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.my_nat_gateway.id
+  }
+
+}
+
+resource "aws_route_table_association" "my-private-route-table-asso" {
+  count          = var.private_subnet_count
+  route_table_id = aws_route_table.my-private-route-table.id
+  subnet_id      = element(aws_subnet.my-private-subnet.*.id, count.index)
+}
+

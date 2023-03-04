@@ -24,3 +24,21 @@ variable "additional_default_tags" {
   type        = map(string)
   description = "These will be the default tags for the resources."
 }
+
+variable "public_subnet_count" {
+  type    = number
+  default = 1
+  validation {
+    condition     = var.public_subnet_count <= 3
+    error_message = "Maximum Allowed Public Subnet Count is 3."
+  }
+}
+
+variable "private_subnet_count" {
+  type    = number
+  default = 1
+  validation {
+    condition     = var.private_subnet_count <= 3
+    error_message = "Maximum Allowed Private Subnet Count is 3."
+  }
+}
