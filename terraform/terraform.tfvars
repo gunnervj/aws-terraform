@@ -1,6 +1,10 @@
-created_by              = "vj_nair"
-vpc_cidr                = "10.255.0.0/20"
-vpc_name                = "terraform-aws"
-additional_default_tags = {}
-public_subnet_count     = 2
-private_subnet_count    = 2
+created_by                            = "vj_nair"
+vpc_cidr                              = "10.0.0.0/16"
+additional_default_tags               = {}
+public_subnet_count                   = 2
+private_subnet_count                  = 2
+enable_nat_gateway                    = false
+additional_public_ingress_nacl_rules  = []
+additional_public_egress_nacl_rules   = []
+additional_private_ingress_nacl_rules = []
+additional_private_egress_nacl_rules  = []
