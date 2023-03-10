@@ -67,3 +67,15 @@ variable "additional_private_egress_nacl_rules" {
   type        = list(any)
   description = "List of Private NACL Rules.NACL Rule can be of format: { from_port : 443, to_port : 443, rule_no : 100, cidr : \"0.0.0.0/0\", action : \"allow\", protocol: \"tcp\" }"
 }
+
+variable "ecs-task-memory" {
+  type        = number
+  description = "Memory for an ECS Container(in GB)."
+  default     = 1
+}
+
+variable "ecs-task-cpu" {
+  type        = number
+  description = "vCPU for an ECS Container"
+  default     = 1
+}

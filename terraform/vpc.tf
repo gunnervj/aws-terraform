@@ -7,9 +7,7 @@ locals {
   ])
 
   default_egress_nacl_rules_public = setunion(var.additional_public_egress_nacl_rules, [
-    { from_port : 443, to_port : 443, rule_no : 100, cidr : "0.0.0.0/0", action : "allow", protocol : "tcp" },
-    { from_port : 80, to_port : 80, rule_no : 110, cidr : "0.0.0.0/0", action : "allow", protocol : "tcp" },
-    { from_port : 22, to_port : 22, rule_no : 120, cidr : "0.0.0.0/0", action : "allow", protocol : "tcp" }
+    { from_port : 0, to_port : 0, rule_no : 100, cidr : "0.0.0.0/0", action : "allow", protocol : "-1" }
   ])
 
   default_egress_nacl_rules_private = setunion(var.additional_private_egress_nacl_rules, [
