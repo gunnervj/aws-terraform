@@ -195,3 +195,40 @@ resource "aws_security_group_rule" "private_veggie_service_allow_egress" {
   description       = "Allow All Outbound Traffic."
 }
 
+resource "aws_security_group" "private-databases-sg" {
+  name        = "${var.project}-private-database-sg"
+  description = "Security Group for Private Database."
+  vpc_id      = aws_vpc.my-vpc.id
+}
+
+resource "aws_security_group_rule" "private-databases-sg-veggie-27017" {
+  security_group_id        = aws_security_group.private-databases-sg.id
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = 27017
+  to_port                  = 27017
+  source_security_group_id = aws_security_group.private_veggie_service_sg.id
+  description              = "Allow Traffic on Port 27017 from Veggie Service"
+}
+
+resource "aws_security_group_rule" "private-databases-sg-fruits-27017" {
+  security_group_id        = aws_security_group.private-databases-sg.id
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = 27017
+  to_port                  = 27017
+  source_security_group_id = aws_security_group.private_fruits_service_sg.id
+  description              = "Allow Traffic on Port 27017 from Fruits Service"
+}
+
+resource "aws_security_group_rule" "private-databases-sg-allow_egress" {
+  security_group_id = aws_security_group.private-databases-sg.id
+  type              = "egress"
+  protocol          = "-1"
+  from_port         = 0
+  to_port           = 0
+  cidr_blocks       = ["0.0.0.0/0"]
+  ipv6_cidr_blocks  = ["::/0"]
+  description       = "Allow All Outbound Traffic."
+}
+

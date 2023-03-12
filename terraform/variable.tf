@@ -79,3 +79,33 @@ variable "ecs-task-cpu" {
   description = "vCPU for an ECS Container"
   default     = 1
 }
+
+variable "database_instance_type" {
+  type        = string
+  description = "Database Instance Type"
+  default     = "t2.micro"
+}
+
+variable "db_private_ip" {
+  type        = string
+  description = "Private IP for the database."
+  default     = "10.0.48.255"
+}
+
+variable "db_ec2_key_pair" {
+  type        = string
+  description = "EC2 Key Pair for DB."
+  default     = "my-keypair"
+}
+
+variable "database_service_name" {
+  type        = string
+  description = "Database Service Name"
+  default     = "database"
+}
+
+variable "database_message" {
+  type        = string
+  description = "Database Message"
+  default     = "Hello from the database"
+}

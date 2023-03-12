@@ -8,3 +8,5 @@ additional_public_ingress_nacl_rules  = []
 additional_public_egress_nacl_rules   = []
 additional_private_ingress_nacl_rules = []
 additional_private_egress_nacl_rules  = []
+db_ec2_key_pair                       = "test"
+db_private_ip                         = "10.0.47.253"

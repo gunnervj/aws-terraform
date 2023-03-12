@@ -36,6 +36,10 @@ resource "aws_ecs_service" "fruits-service" {
     assign_public_ip = false
     security_groups  = [aws_security_group.private_fruits_service_sg.id]
   }
+
+  depends_on = [
+    aws_instance.database
+  ]
 }
 
 
@@ -57,4 +61,8 @@ resource "aws_ecs_service" "veggie-service" {
     assign_public_ip = false
     security_groups  = [aws_security_group.private_veggie_service_sg.id]
   }
+  
+  depends_on = [
+    aws_instance.database
+  ]
 }
