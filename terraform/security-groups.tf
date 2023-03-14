@@ -281,6 +281,15 @@ resource "aws_security_group_rule" "consul-server-sg-egress" {
   description       = "Allow WAN gossip traffic form the Consul Server to Server. For cross data-center communications."
 }
 
+resource "aws_security_group_rule" "consul_server_allow_alb_8500" {
+  security_group_id        = aws_security_group.consul_server.id
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = 8500
+  to_port                  = 8500
+  source_security_group_id = aws_security_group.consul_server_alb.id
+  description              = "Allow HTTP traffic from Load Balancer onto the Consul Server API."
+}
 
 resource "aws_security_group" "consul_server_alb" {
   name_prefix = "${var.project}-consul-server-alb"

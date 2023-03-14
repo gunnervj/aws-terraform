@@ -127,9 +127,3 @@ variable "consul_server_allowed_cidr_blocks" {
   description = "List of valid IPv4 CIDR blocks that can access the consul servers from the public internet."
   default     = ["0.0.0.0/0"]
 }
-
-variable "consul_server_allowed_cidr_blocks_ipv6" {
-  type        = list(string)
-  description = "List of valid IPv6 CIDR blocks that can access the consul servers from the public internet."
-  default     = ["::/0"]
-}
