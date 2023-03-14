@@ -14,13 +14,6 @@ provider "aws" {
   }
 }
 
-locals {
-  common_tags = {
-    "created_by"        = var.created_by
-    "created_by_script" = "aws-terraform"
-    "project"           = var.project
-  }
-}
 
 
 

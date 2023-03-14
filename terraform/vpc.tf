@@ -1,25 +1,3 @@
-locals {
-  is_nat_gateway_enabled = var.enable_nat_gateway ? 1 : 0
-  default_ingress_nacl_rules_public = setunion(var.additional_public_ingress_nacl_rules, [
-    { from_port : 443, to_port : 443, rule_no : 100, cidr : "0.0.0.0/0", action : "allow", protocol : "tcp" },
-    { from_port : 80, to_port : 80, rule_no : 110, cidr : "0.0.0.0/0", action : "allow", protocol : "tcp" },
-    { from_port : 22, to_port : 22, rule_no : 120, cidr : "0.0.0.0/0", action : "allow", protocol : "tcp" }
-  ])
-
-  default_egress_nacl_rules_public = setunion(var.additional_public_egress_nacl_rules, [
-    { from_port : 0, to_port : 0, rule_no : 100, cidr : "0.0.0.0/0", action : "allow", protocol : "-1" }
-  ])
-
-  default_egress_nacl_rules_private = setunion(var.additional_private_egress_nacl_rules, [
-    { from_port : 0, to_port : 0, rule_no : 100, cidr : "0.0.0.0/0", action : "allow", protocol : "-1" }
-  ])
-
-  default_ingress_nacl_rules_private = setunion(var.additional_private_egress_nacl_rules, [
-    { from_port : 0, to_port : 0, rule_no : 100, cidr : var.vpc_cidr, action : "allow", protocol : "-1" },
-    { from_port : 1024, to_port : 65535, rule_no : 110, cidr : "0.0.0.0/0", action : "allow", protocol : "tcp" }
-  ])
-}
-
 
 # VPC 
 resource "aws_vpc" "my-vpc" {
@@ -47,7 +25,7 @@ resource "aws_internet_gateway" "my-internet-gateway" {
 resource "aws_subnet" "my-public-subnet" {
   count                           = var.public_subnet_count
   vpc_id                          = aws_vpc.my-vpc.id
-  cidr_block                      = cidrsubnet(aws_vpc.my-vpc.cidr_block, 8, count.index)
+  cidr_block                      = local.public_cidr_blocks[count.index]
   ipv6_cidr_block                 = cidrsubnet(aws_vpc.my-vpc.ipv6_cidr_block, 8, count.index)
   assign_ipv6_address_on_creation = true
   map_public_ip_on_launch         = true
@@ -85,7 +63,7 @@ resource "aws_route_table_association" "my-public-route-table-asso" {
 resource "aws_subnet" "my-private-subnet" {
   count             = var.private_subnet_count
   vpc_id            = aws_vpc.my-vpc.id
-  cidr_block        = cidrsubnet(aws_vpc.my-vpc.cidr_block, 4, count.index + var.public_subnet_count)
+  cidr_block        = local.private_cidr_blocks[count.index]
   availability_zone = data.aws_availability_zones.available.names[count.index]
 
   tags = {
